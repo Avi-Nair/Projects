@@ -1,0 +1,74 @@
+<!-- templates/result.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Program Result</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #000000;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        h1 {
+            color: #03e9f4;
+            text-shadow: 0 0 5px #03e9f4,
+              0 0 25px #03e9f4,
+              0 0 50px #03e9f4,
+              0 0 100px #03e9f4;
+            font-size: 6vh;
+            margin-top: 0%;
+            margin-bottom: 3%;
+        }
+
+        pre {
+            color: #ffffff;
+            font-size: 18px;
+            white-space: pre-wrap; /* Preserve spaces and wrap lines */
+            word-wrap: break-word;
+        }
+
+        p {
+            color: #ff4f4f;
+        }
+
+        a {
+            color: #03e9f4;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <h1>Program Result</h1>
+    <pre id="resultContent"></pre>
+    <p>{{ error }}</p>
+    <a href="/">Back to Home</a>
+
+    <!-- JavaScript to read and display content with dynamic line breaks -->
+    <script>
+        fetch('/static/output.txt')
+            .then(response => response.text())
+            .then(result => {
+                // Dynamically insert line breaks based on content length
+                const maxLineLength = 80; // Adjust as needed
+                const formattedResult = result.replace(new RegExp(`.{1,${maxLineLength}}`, 'g'), '$&\n');
+                document.getElementById('resultContent').innerText = formattedResult;
+            })
+            .catch(error => {
+                console.error('Error fetching result:', error);
+            });
+    </script>
+</body>
+</html> 

@@ -1,0 +1,156 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-16">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E0 Bluetooth Cipher</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #000000;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        h1 {
+            color: #03e9f4;
+            text-shadow: 0 0 5px #03e9f4,
+              0 0 20px #03e9f4,
+              0 0 40px #03e9f4,
+              0 0 800px #03e9f4;
+            font-size: 6vh;
+            margin-top: 0%;
+            margin-bottom: 3%;
+        }
+
+        form {
+            background-color: #313131;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.187);
+            width: 300px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #ffffff;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #1e1d1d;
+            color: #fff;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 5px;
+            margin-top: 5px;
+        }
+
+        button:hover {
+            background: #03e9f4;
+            color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 5px #03e9f4,
+              0 0 25px #03e9f4,
+              0 0 50px #03e9f4,
+              0 0 100px #03e9f4;
+        }
+    </style>
+</head>
+<body>
+    <h1>E0 Bluetooth Cipher</h1>
+    <form action="/run_program" method="post" id="inputForm">
+        <label for="Kc"><b>Kc:</b></label>
+        <input type="number" name="Kc" id="Kc" required oninput="validity.valid||(value='');">
+        <button type="button" onclick="fillRandomNumber('Kc', BigInt('0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'))">Generate Random</button><br>
+
+        <label for="BluetoothAddress"><b>Address:</b> </label>
+        <input type="number" name="BluetoothAddress" id="BluetoothAddress" required oninput="validity.valid||(value='');">
+        <button type="button" onclick="fillRandomNumber('BluetoothAddress', BigInt('0x7FFFFFFFFFFFFF'))">Generate Random</button><br>
+
+        <label for="Clock"><b>Clock:</b></label>
+        <input type="number" name="Clock" id="Clock" required oninput="validity.valid||(value='');">
+        <button type="button" onclick="fillRandomNumber('Clock', BigInt('0x3FFFFFFF'))">Generate Random</button><br>
+
+        <label for="L"><b>L:</b></label>
+        <input type="number" name="L" id="L" required oninput="validity.valid||(value='');">
+        <button type="button" onclick="fillRandomNumber('L', 16)">Generate Random</button><br>
+
+        <label for="PlainText"><b>Message:</b></label>
+        <input type="text" name="PlainText" id="PlainText" required><br>
+
+        <label for="mode"><b>Mode:</b></label>
+        <select name="mode" id="mode">
+            <option value="1">Encrypt</option>
+            <option value="2">Decrypt</option>
+        </select><br>
+
+        <button type="submit">Process</button>
+        <button type="button" onclick="reEnterLastValues()">Re-enter Last Values</button>
+        <button type="button" onclick="fillPlainTextFromOutputFile()">Fill in encrypted bits for decryption</button>
+    </form>
+
+    <script>
+        function fillRandomNumber(inputId, maxValue) {
+            const randomValue = BigInt(Math.floor(Math.random() * Number(maxValue)));
+            document.getElementById(inputId).value = randomValue.toString();
+        }
+
+        function reEnterLastValues() {
+            document.getElementById('Kc').value = localStorage.getItem('lastKc') || '';
+            document.getElementById('BluetoothAddress').value = localStorage.getItem('lastBluetoothAddress') || '';
+            document.getElementById('Clock').value = localStorage.getItem('lastClock') || '';
+            document.getElementById('L').value = localStorage.getItem('lastL') || '';
+            document.getElementById('PlainText').value = localStorage.getItem('lastPlainText') || '';
+        }
+
+        // Function to fetch content after "Cipher text: " and fill "Plain Text"
+        function fillPlainTextFromOutputFile() {
+            fetch('/static/output.txt')
+                .then(response => response.text())
+                .then(result => {
+                    const cipherTextIndex = result.indexOf('Cipher text: ');
+                    if (cipherTextIndex !== -1) {
+                        // Extract text after "Cipher text: "
+                        const cipherText = result.substring(cipherTextIndex + 'Cipher text: '.length);
+                        // Fill "Plain Text" form field
+                        document.getElementById('PlainText').value = cipherText;
+                    } else {
+                        console.error('Cipher text not found in the output file.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching result:', error);
+                });
+        }
+
+        // Save the last values when the form is submitted
+        document.getElementById('inputForm').addEventListener('submit', function () {
+            localStorage.setItem('lastKc', document.getElementById('Kc').value);
+            localStorage.setItem('lastBluetoothAddress', document.getElementById('BluetoothAddress').value);
+            localStorage.setItem('lastClock', document.getElementById('Clock').value);
+            localStorage.setItem('lastL', document.getElementById('L').value);
+            localStorage.setItem('lastPlainText', document.getElementById('PlainText').value);
+        });
+    </script>
+</body>
+</html>
